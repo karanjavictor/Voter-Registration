@@ -12,8 +12,7 @@
             </p>
             <div class="button-container rounded-xl p-6 flex gap-x-4 justify-center items-center max-w-3xl mx-auto">
                 <v-btn color="primary" variant="flat" class="rounded-lg" size="large" to="/voter-registration">Register as a Voter</v-btn>
-                <v-btn color="primary" variant="flat" class="rounded-lg" size="large">Check your Voter Details</v-btn>
-
+                <v-btn color="primary" variant="flat" class="rounded-lg" size="large" to="/voter-check">Check your Voter Details</v-btn>
             </div>
         </v-container>
     </section>

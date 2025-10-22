@@ -11,10 +11,9 @@
 
         <v-spacer></v-spacer>
 
-        <div class="w-1/4">
-            <v-btn color="primary" variant="text">Home</v-btn>
+        <div class="gap-x-4 flex items-center">
+            <v-btn color="primary" variant="text" to="/">Home</v-btn>
             <v-btn color="primary" variant="text">Login</v-btn>
-            <v-btn color="primary" variant="text">Register</v-btn>
         </div>
     </v-app-bar>
 </template>

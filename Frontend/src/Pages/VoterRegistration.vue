@@ -5,8 +5,8 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
 <template>
     <div class="px-4 py-4 mt-6">
         <!-- Page Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-primary mb-2">Register as a Voter</h1>
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-primary mb-2">Register your Voter Details</h1>
             <p class="text-lg text-secondary">Fill in the form below to register as a voter</p>
         </div>
         <!-- Voter Registration Form -->

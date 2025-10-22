@@ -13,6 +13,11 @@ const router = createRouter({
       name: 'voter-registration',
       component: () => import('@/Pages/VoterRegistration.vue'),
     },
+    {
+      path: '/voter-check',
+      name: 'voter-check',
+      component: () => import('@/Pages/VoterCheck.vue'),
+    },
   ],
 })
 
