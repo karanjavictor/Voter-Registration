@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+:root {
+    --v-font-family: "Nunito Sans", system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+}
+
+@theme {
+    --color-primary: #9FCF67
+    --color-secondary: #4B5563;
+}
+
+html, body, #app {
+    font-family: var(--v-font-family);
+    color: var(--color-secondary);
+}
