@@ -5,6 +5,7 @@ import { createVuetify } from 'vuetify'
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
+import 'unfonts.css'
 
 const vuetify = createVuetify(
     {

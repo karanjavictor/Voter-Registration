@@ -7,7 +7,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('@/Pages/Home.vue'),
-    }
+    },
+    {
+      path: '/voter-registration',
+      name: 'voter-registration',
+      component: () => import('@/Pages/VoterRegistration.vue'),
+    },
   ],
 })
 
