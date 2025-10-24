@@ -23,6 +23,18 @@ const router = createRouter({
       name: 'staff-login',
       component: () => import('@/Pages/StaffLogin.vue'),
     },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('@/components/Dashboard/Dashboard.vue'),
+      children: [
+        {
+          path: '/dashboard/create-staff',
+          name: 'voters',
+          component: () => import('@/components/Dashboard/CreateStaff.vue'),
+        },
+      ],
+    },
   ],
 })
 
