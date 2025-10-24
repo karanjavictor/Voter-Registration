@@ -45,7 +45,7 @@ const navLinks = ref([
                 </v-avatar>
                 <div>
                     <h2 class="text-xl font-bold text-primary mb-1">Dashboard</h2>
-                    <p class="text-sm text-secondary">Manage your Voter Verification Portal</p>
+                    <p class="text-sm text-secondary">Manage Voter Verification Portal</p>
                 </div>
             </div>
         </div>

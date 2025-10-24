@@ -38,6 +38,11 @@ const router = createRouter({
           name: 'view-staff',
           component: () => import('@/components/Dashboard/ViewStaff.vue'),
         },
+        {
+          path: '/dashboard/view-voters',
+          name: 'view-voters',
+          component: () => import('@/components/Dashboard/ViewVoters.vue'),
+        },
       ],
     },
   ],
