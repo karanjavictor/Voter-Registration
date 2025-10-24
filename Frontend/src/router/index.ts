@@ -18,6 +18,11 @@ const router = createRouter({
       name: 'voter-check',
       component: () => import('@/Pages/VoterCheck.vue'),
     },
+    {
+      path: '/staff-login',
+      name: 'staff-login',
+      component: () => import('@/Pages/StaffLogin.vue'),
+    },
   ],
 })
 

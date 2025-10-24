@@ -13,7 +13,7 @@
 
         <div class="gap-x-4 flex items-center">
             <v-btn color="primary" variant="text" to="/">Home</v-btn>
-            <v-btn color="primary" variant="text">Login</v-btn>
+            <v-btn color="primary" variant="text" to="/staff-login">Login</v-btn>
         </div>
     </v-app-bar>
 </template>
