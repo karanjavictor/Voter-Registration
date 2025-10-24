@@ -30,8 +30,13 @@ const router = createRouter({
       children: [
         {
           path: '/dashboard/create-staff',
-          name: 'voters',
+          name: 'create-staff',
           component: () => import('@/components/Dashboard/CreateStaff.vue'),
+        },
+        {
+          path: '/dashboard/view-staff',
+          name: 'view-staff',
+          component: () => import('@/components/Dashboard/ViewStaff.vue'),
         },
       ],
     },
