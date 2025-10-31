@@ -29,6 +29,11 @@ const router = createRouter({
       component: () => import('@/components/Dashboard/Dashboard.vue'),
       children: [
         {
+          path: '/dashboard/dashboard-overview',
+          name: 'dashboard-overview',
+          component: () => import('@/components/Dashboard/DashboardOverview.vue'),
+        },
+        {
           path: '/dashboard/create-staff',
           name: 'create-staff',
           component: () => import('@/components/Dashboard/CreateStaff.vue'),
@@ -42,6 +47,16 @@ const router = createRouter({
           path: '/dashboard/view-voters',
           name: 'view-voters',
           component: () => import('@/components/Dashboard/ViewVoters.vue'),
+        },
+        {
+          path: '/dashboard/view-logs',
+          name: 'view-logs',
+          component: () => import('@/components/Dashboard/ViewLogs.vue'),
+        },
+        {
+          path: '/dashboard/view-analytics',
+          name: 'view-analytics',
+          component: () => import('@/components/Dashboard/ViewAnalytics.vue'),
         },
       ],
     },

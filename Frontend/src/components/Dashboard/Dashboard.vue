@@ -5,7 +5,7 @@ const navLinks = ref([
         title: 'Dashboard Overview',
         subtitle: 'View your dashboard',
         icon: 'mdi-home',
-        to: '/dashboard/home',
+        to: '/dashboard/dashboard-overview',
     },
     {
         title: 'Create Staff',
@@ -26,10 +26,16 @@ const navLinks = ref([
         to: '/dashboard/view-voters',
     },
     {
-        title: 'Analytics',
+        title: 'View Logs',
+        subtitle: 'View logs',
+        icon: 'mdi-file-chart',
+        to: '/dashboard/view-logs',
+    },
+    {
+        title: 'View Analytics',
         subtitle: 'View analytics',
         icon: 'mdi-chart-bar',
-        to: '/dashboard/analytics',
+        to: '/dashboard/view-analytics',
     },
 ]);
 </script>
@@ -39,7 +45,7 @@ const navLinks = ref([
     <v-navigation-drawer permanent width="400" class="desktop-nav-drawer" elevation="2">
         <!-- Dashboard Header -->
         <div class="drawer-header">
-            <div class="d-flex align-center pa-6 bg-primary/5 border-b">
+            <div class="d-flex align-center pa-6 border-b mt-2">
                 <v-avatar size="48" class="bg-primary/20 mr-4">
                     <v-icon icon="mdi-account-circle" color="primary" size="32"></v-icon>
                 </v-avatar>

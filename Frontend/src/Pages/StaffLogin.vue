@@ -23,7 +23,7 @@ import { ref } from 'vue';
                         class="rounded-lg" variant="outlined" type="password" bg-color="white"></v-text-field>
 
                     <div class="flex justify-center mt-8">
-                        <v-btn color="primary" variant="flat" class="rounded-lg" size="large" to="/dashboard">Login</v-btn>
+                        <v-btn color="primary" variant="flat" class="rounded-lg" size="large" to="/dashboard/dashboard-overview">Login</v-btn>
                     </div>
                 </v-form>
             </div>
