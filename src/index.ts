@@ -1,83 +1,32 @@
-/**
- * Voter Registration System
- * Main entry point for the application
- */
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import staffRouter from './routes/staffRoutes';
 
-interface Voter {
-  id: string;
-  name: string;
-  age: number;
-  registered: boolean;
-  registrationDate?: Date;
-}
+dotenv.config();
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-class VoterRegistrationSystem {
-  private voters: Map<string, Voter> = new Map();
+const PORT = process.env['PORT'] || 3030;
+const NODE_ENV = process.env['NODE_ENV'] || "development";
 
-  /**
-   * Register a new voter
-   */
-  registerVoter(voter: Omit<Voter, 'id' | 'registered' | 'registrationDate'>): Voter {
-    const id = this.generateId();
-    const newVoter: Voter = {
-      ...voter,
-      id,
-      registered: true,
-      registrationDate: new Date()
-    };
-
-    this.voters.set(id, newVoter);
-    return newVoter;
-  }
-
-  /**
-   * Get voter by ID
-   */
-  getVoter(id: string): Voter | undefined {
-    return this.voters.get(id);
-  }
-
-  /**
-   * Get all registered voters
-   */
-  getAllVoters(): Voter[] {
-    return Array.from(this.voters.values());
-  }
-
-  /**
-   * Check if voter is eligible to register
-   */
-  isEligibleToRegister(age: number): boolean {
-    return age >= 18;
-  }
-
-  /**
-   * Generate a unique ID for voters
-   */
-  private generateId(): string {
-    return `voter_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-}
-
-// Example usage
-function main(): void {
-  console.log('Voter Registration System Started');
-  
-  const registrationSystem = new VoterRegistrationSystem();
-
-  // Example voter registration
-  const voter1 = registrationSystem.registerVoter({
-    name: 'John Doe',
-    age: 29
+  // Development mode - show message for non-API routes
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    
+    res.json({ 
+      message: 'Voter Registration API - Development Mode',
+      note: 'Frontend should be served separately in development',
+      frontend_dev_server: 'http://localhost:5173'
+    });
   });
 
-  console.log('Registered voter:', voter1);
-  console.log('Total voters:', registrationSystem.getAllVoters().length);
-}
+app.use('/api/staff', staffRouter);
 
-// Run the application
-if (require.main === module) {
-  main();
-}
-
-export { VoterRegistrationSystem, Voter };
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT} in ${NODE_ENV} mode`);
+});

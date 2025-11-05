@@ -1,24 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axiosInstance from '@/config/axiosInstance';
+
+type StaffRole = 'Administrator' | 'Clerk' | 'Supervisor';
+type Gender = 'Male' | 'Female' | 'Rather not say';
+type Constituency = 'nairobi' | 'Machakos' | 'Mombasa' | 'Kisumu' | 'Bungoma' | 'Isiolo' | 'Tana River';
+
+interface Staff {
+    staff_id: string;
+    firstname: string;
+    surname: string;
+    dateOfBirth: string;
+    gender: Gender;
+    nationalIdNumber: string;
+    constituency: Constituency;
+    role: StaffRole;
+    password: string;
+    staffId: string;
+}
+const staffAccounts = ref<Staff[]>([]);
 const headers = ref([
     { title: 'ID', key: 'id', sortable: true },
-    { title: 'First Name', key: 'firstName', sortable: true },
+    { title: 'First Name', key: 'firstname', sortable: true },
     { title: 'Surname', key: 'surname', sortable: true },
     { title: 'Date of Birth', key: 'dateOfBirth', sortable: true },
     { title: 'Gender', key: 'gender', sortable: true },
-    { title: 'National ID No.', key: 'nationalIdNumber', sortable: true },
+    { title: 'National ID', key: 'nationalIdNumber', sortable: true },
     { title: 'Constituency', key: 'constituency', sortable: true },
     { title: 'Role', key: 'role', sortable: true },
     { title: 'Actions', key: 'actions', sortable: false },
-]);
-const staffAccounts = ref([
-    { id: 1, firstName: 'John', surname: 'Doe', dateOfBirth: '1990-01-01', gender: 'Male', nationalIdNumber: '1234567890', constituency: 'Nairobi', role: 'Admin' },
-    { id: 2, firstName: 'Jane', surname: 'Smith', dateOfBirth: '1995-08-08', gender: 'Female', nationalIdNumber: '1234567891', constituency: 'Machakos', role: 'Clerk' },
-    { id: 3, firstName: 'Jim', surname: 'Beam', dateOfBirth: '2001-05-05', gender: 'Male', nationalIdNumber: '1234567892', constituency: 'Mombasa', role: 'Clerk' },
-    { id: 4, firstName: 'Jill', surname: 'Jones', dateOfBirth: '2003-02-02', gender: 'Female', nationalIdNumber: '1234567893', constituency: 'Kisumu', role: 'Admin' },
-    { id: 5, firstName: 'Jack', surname: 'Brown', dateOfBirth: '1997-11-11', gender: 'Male', nationalIdNumber: '1234567894', constituency: 'Bungoma', role: 'Clerk' },
-    { id: 6, firstName: 'Jill', surname: 'Davis', dateOfBirth: '1986-06-06', gender: 'Female', nationalIdNumber: '1234567895', constituency: 'Isiolo', role: 'Admin' },
-    { id: 7, firstName: 'Jack', surname: 'Garcia', dateOfBirth: '1986-03-03', gender: 'Male', nationalIdNumber: '1234567896', constituency: 'Tana River', role: 'Clerk' },
 ]);
 const constituencies = ref([
     'Nairobi',
@@ -34,11 +44,26 @@ const dialog = ref(false);
 
 const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
-        case 'admin': return 'primary';
-        case 'clerk': return 'secondary';
+        case 'administrator': return 'primary';
+        case 'clerk': return 'info';
+        case 'supervisor': return 'success';
         default: return 'warning';
     }
 };
+
+const getAllStaff = async () => {
+    try {
+        const response = await axiosInstance.get('/api/staff/get-all-staff');
+        console.log(response);
+        staffAccounts.value = response.data.staff as Staff[];
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+onMounted(() => {
+    getAllStaff();
+})
 </script>
 <template>
     <div class="px-4 py-4">
@@ -98,8 +123,12 @@ const getRoleColor = (role: string) => {
                 </v-row>
             </v-card-title>
 
-            <v-data-table :headers="headers" :items="staffAccounts" item-value="firstName" class="staff-accounts-table"
+            <v-data-table :headers="headers" :items="staffAccounts" item-value="id" class="staff-accounts-table"
                 :items-per-page="10" :mobile="$vuetify.display.mdAndDown" :mobile-breakpoint="960">
+                <!-- date of birth column -->
+                <template v-slot:item.dateOfBirth="{ item }">
+                    <p class="text-sm text-secondary">{{ new Date(item.dateOfBirth).toLocaleDateString() }}</p>
+                </template>
                 <!-- Role Column with Chips -->
                 <template v-slot:item.role="{ item }">
                     <v-chip :color="getRoleColor(item.role)" size="small" variant="flat" class="rounded-lg font-medium">
