@@ -3,8 +3,8 @@ import { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 
 type StaffRole = 'Administrator' | 'Clerk' | 'Supervisor';
-type Gender = 'Male' | 'Female' | 'Rather not say';
-type Constituency = 'nairobi' | 'Machakos' | 'Mombasa' | 'Kisumu' | 'Bungoma' | 'Isiolo' | 'Tana River';
+export type Gender = 'Male' | 'Female' | 'Rather not say';
+export type Constituency = 'Nairobi' | 'Machakos' | 'Mombasa' | 'Kisumu' | 'Bungoma' | 'Isiolo' | 'Tana River';
 
 interface Staff {
     firstName: string;
@@ -17,7 +17,6 @@ interface Staff {
     password: string;
     staffId: string;
 }
-
 const hashPassword = async (password: string) => {
     return await bcrypt.hash(password, 10);
 }
@@ -28,21 +27,23 @@ export const createStaff = async (req: Request, res: Response) => {
         const hashedPassword = await hashPassword(password);
         const staff: Staff = { firstName, surname, dateOfBirth: new Date(dateOfBirth), gender, nationalIdNumber, constituency, role, password: hashedPassword, staffId: staffId };
         console.log(staff);
+        const checkNationalIdNumber = await pool.query('SELECT * FROM staff WHERE nationalIdNumber = ?', [nationalIdNumber]);
+        if (checkNationalIdNumber.length > 0) {
+            throw new Error('Staff with this National ID number already exists');
+        }
         const formattedDateOfBirth = staff.dateOfBirth.toISOString().split('T')[0];
-        // Use staff.dateOfBirth (which is a Date object) instead of dateOfBirth (which is a string)
         const [result] = await pool.query('INSERT INTO staff (firstName, surname, dateOfBirth, gender, nationalIdNumber, constituency, role, password, staff_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [firstName, surname, formattedDateOfBirth, gender, nationalIdNumber, constituency, role, hashedPassword, staffId]);
         console.log(result);
         res.status(201).json({ message: 'Staff created successfully', staff });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Failed to create staff', error });
+        res.status(400).json({ error: error instanceof Error ? error.message : 'Failed to create staff' });
     }
 }
 
 export const getAllStaff = async (_req: Request, res: Response) => {
     try {
         const [result] = await pool.query('SELECT * FROM staff');
-        console.log(result);
         res.status(200).json({ message: 'Staff fetched successfully', staff: result });
     } catch (error) {
         console.error(error);

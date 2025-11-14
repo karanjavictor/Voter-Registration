@@ -1,5 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import axiosInstance from '@/config/axiosInstance';
+import { ref, onMounted } from 'vue';
+
+type Gender = 'Male' | 'Female' | 'Rather not say';
+type Constituency = 'nairobi' | 'Machakos' | 'Mombasa' | 'Kisumu' | 'Bungoma' | 'Isiolo' | 'Tana River';
+
+interface Voter {
+    id?: number;
+    firstName: string;
+    surname: string;
+    dateOfBirth: Date;
+    gender: Gender;
+    nationalIdNumber: string;
+    constituency: Constituency;
+    isDeceased?: Boolean;
+}
 const headers = ref([
     { title: 'ID', key: 'id', sortable: true },
     { title: 'First Name', key: 'firstName', sortable: true },
@@ -10,15 +25,7 @@ const headers = ref([
     { title: 'Constituency', key: 'constituency', sortable: true },
     { title: 'Actions', key: 'actions', sortable: false },
 ]);
-const voters = ref([
-    { id: 1, firstName: 'John', surname: 'Doe', dateOfBirth: '1990-01-01', gender: 'Male', nationalIdNumber: '1234567890', constituency: 'Nairobi' },
-    { id: 2, firstName: 'Jane', surname: 'Smith', dateOfBirth: '1995-08-08', gender: 'Female', nationalIdNumber: '1234567891', constituency: 'Machakos' },
-    { id: 3, firstName: 'Jim', surname: 'Beam', dateOfBirth: '2001-05-05', gender: 'Male', nationalIdNumber: '1234567892', constituency: 'Mombasa' },
-    { id: 4, firstName: 'Jill', surname: 'Jones', dateOfBirth: '2003-02-02', gender: 'Female', nationalIdNumber: '1234567893', constituency: 'Kisumu' },
-    { id: 5, firstName: 'Jack', surname: 'Brown', dateOfBirth: '1997-11-11', gender: 'Male', nationalIdNumber: '1234567894', constituency: 'Bungoma' },
-    { id: 6, firstName: 'Jill', surname: 'Davis', dateOfBirth: '1986-06-06', gender: 'Female', nationalIdNumber: '1234567895', constituency: 'Isiolo' },
-    { id: 7, firstName: 'Jack', surname: 'Garcia', dateOfBirth: '1986-03-03', gender: 'Male', nationalIdNumber: '1234567896', constituency: 'Tana River' },
-]);
+const voters = ref<Voter[]>([]);
 const constituencies = ref([
     'Nairobi',
     'Machakos',
@@ -30,7 +37,20 @@ const constituencies = ref([
 ]);
 
 const dialog = ref(false);
-const isDeceased = ref(false);
+
+const getAllVoters = async () => {
+    try {
+        const response = await axiosInstance.get('/api/voter/get-all-voters');
+        console.log(response);
+        voters.value = response.data.voters as Voter[];
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+onMounted(() => {
+    getAllVoters();
+})
 </script>
 <template>
     <div class="px-4 py-4">
@@ -97,7 +117,7 @@ const isDeceased = ref(false);
             </v-data-table>
         </v-card>
     </div>
-    <v-dialog v-model="dialog" max-width="500">
+    <!-- <v-dialog v-model="dialog" max-width="500">
         <v-card class="pa-4">
             <v-card-title>
                 <h2 class="text-xl font-semibold text-primary">Update Voter Details</h2>
@@ -108,7 +128,6 @@ const isDeceased = ref(false);
                         class="rounded-lg" color="primary" :items="constituencies" bg-color="white"></v-select>
                     <v-divider class="my-4"></v-divider>
                     <v-switch v-model="isDeceased" label="Mark as Deceased" color="error"></v-switch>
-                    <!-- Death Certificate Number -->
                     <v-text-field v-if="isDeceased" label="Death Certificate Number" hint="Must be a valid death certificate number" prepend-inner-icon="mdi-card" variant="outlined"
                         class="rounded-lg" color="primary" type="text" bg-color="white"></v-text-field>
                     <p class="text-sm text-error mb-4">Note: Marking as deceased cannot be undone</p>
@@ -120,7 +139,7 @@ const isDeceased = ref(false);
                 <v-btn color="primary" variant="flat" size="small" class="rounded-lg">Confirm</v-btn>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    </v-dialog> -->
 </template>
 
 <style scoped></style>

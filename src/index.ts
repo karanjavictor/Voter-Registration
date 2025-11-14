@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import staffRouter from './routes/staffRoutes';
-
+import voterRouter from './routes/voterRoutes';
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -26,7 +26,7 @@ const NODE_ENV = process.env['NODE_ENV'] || "development";
   });
 
 app.use('/api/staff', staffRouter);
-
+app.use('/api/voter', voterRouter);
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT} in ${NODE_ENV} mode`);
 });

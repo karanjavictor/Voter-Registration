@@ -114,11 +114,16 @@ const createStaff = async () => {
         console.log(response)
         showSuccessAlert.value = true
         successAlertMessage.value = response.data.message
-    } catch (error: any) {
-        showErrorAlert.value = true
-        errorAlertMessage.value = error instanceof Error ? error.message : 'An unknown error occurred'
-        console.error(error)
-    } finally {
+    }  catch (error: any) {
+        if (error.response?.status === 400) {
+            showErrorAlert.value = true
+            errorAlertMessage.value = error.response.data.error
+        } else {
+            showErrorAlert.value = true
+            errorAlertMessage.value = 'An unknown error occurred'
+        }
+    }
+     finally {
         loading.value = false
         showStaffLoginDetails.value = false
     }
@@ -170,7 +175,7 @@ const createStaff = async () => {
                 <v-col cols="12" lg="6">
                     <v-text-field label="National ID Number*" prepend-inner-icon="mdi-card" variant="outlined"
                         class="rounded-lg" color="primary" type="number" bg-color="white" required
-                        v-model="staffForm.nationalIdNumber" :rules="[(v) => !!v || 'National ID number is required']"></v-text-field>
+                        v-model="staffForm.nationalIdNumber" :rules="[(v) => !!v || 'National ID number is required', (v) => v.toString().length === 8 || 'National ID number must be 8 digits']"></v-text-field>
                 </v-col>
                 <v-col cols="12" lg="6">
                     <v-select label="Constituency*" prepend-inner-icon="mdi-flag" variant="outlined" class="rounded-lg"
