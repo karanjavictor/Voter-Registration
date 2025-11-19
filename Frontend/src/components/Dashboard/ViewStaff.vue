@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axiosInstance from '@/config/axiosInstance';
+import { VForm } from 'vuetify/components';
 
 type StaffRole = 'Administrator' | 'Clerk' | 'Supervisor';
 type Gender = 'Male' | 'Female' | 'Rather not say';
-type Constituency = 'nairobi' | 'Machakos' | 'Mombasa' | 'Kisumu' | 'Bungoma' | 'Isiolo' | 'Tana River';
+type Constituency = 'Nairobi' | 'Machakos' | 'Mombasa' | 'Kisumu' | 'Bungoma' | 'Isiolo' | 'Tana River';
+type StaffStatus = 'Active' | 'Inactive'
 
 interface Staff {
     staff_id: string;
@@ -17,6 +19,13 @@ interface Staff {
     role: StaffRole;
     password: string;
     staffId: string;
+    isActive: StaffStatus;
+}
+interface SelectedStaff {
+    nationalIdNumber: '';
+    isActive: StaffStatus;
+    role: StaffRole;
+    constituency: Constituency;
 }
 const staffAccounts = ref<Staff[]>([]);
 const headers = ref([
@@ -39,8 +48,25 @@ const constituencies = ref([
     'Isiolo',
     'Tana River',
 ]);
+const roles = ref([
+    'Clerk',
+    'Administrator',
+    'Supervisor'
+])
 
-const dialog = ref(false);
+const editDialog = ref(false);
+const selectedStaff = ref<SelectedStaff>({
+    nationalIdNumber: '',
+    isActive: 'Active',
+    role: 'Clerk',
+    constituency: 'Nairobi'
+})
+const loading = ref(false)
+const showSuccessAlert = ref(false)
+const showErrorAlert = ref(false)
+const successAlertMessage = ref('')
+const errorAlertMessage = ref('')
+const updateStaffForm = ref<VForm | null>(null);
 
 const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
@@ -52,23 +78,74 @@ const getRoleColor = (role: string) => {
 };
 
 const getAllStaff = async () => {
+    loading.value = true
     try {
         const response = await axiosInstance.get('/api/staff/get-all-staff');
         console.log(response);
         staffAccounts.value = response.data.staff as Staff[];
     } catch (error) {
         console.error(error);
+    } finally {
+        loading.value = false
     }
 }
 
 onMounted(() => {
     getAllStaff();
 })
+
+const editStaff = (item: any) => {
+    selectedStaff.value = {
+        nationalIdNumber: item.nationalIdNumber,
+        isActive: item.isActive,
+        constituency: item.constituency,
+        role: item.role
+    }
+    editDialog.value = true
+}
+const handleSave = async (updatedValue: any) => {
+    const { valid } = await updateStaffForm.value?.validate() as { valid: boolean };
+    if (!valid) {
+        return;
+    }
+    loading.value = true
+    try {
+        const response = await axiosInstance.patch('/api/staff/update-staff', updatedValue)
+        showSuccessAlert.value = true
+        successAlertMessage.value = response.data.message
+        await getAllStaff()
+    } catch (error: any) {
+        if (error.response?.status === 400) {
+            showErrorAlert.value = true
+            errorAlertMessage.value = error.response.data.error
+        } else {
+            showErrorAlert.value = true
+            errorAlertMessage.value = 'An unknown error occurred'
+        }
+    }
+    finally {
+        loading.value = false
+    }
+}
 </script>
 <template>
+    <!-- Success Alert -->
+    <v-snackbar v-if="showSuccessAlert" v-model="showSuccessAlert" color="success" class="rounded-lg">
+        {{ successAlertMessage }}
+    </v-snackbar>
+    <!-- Error Alert -->
+    <v-snackbar v-if="showErrorAlert" v-model="showErrorAlert" color="error" class="rounded-lg">
+        {{ errorAlertMessage }}
+    </v-snackbar>
     <div class="px-4 py-4">
-        <h1 class="text-3xl font-bold text-primary mb-4">View Staff Accounts</h1>
-        <p class="text-lg text-secondary mb-4">View Staff Accounts By Constituency</p>
+        <div class="mb-8 flex align-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-primary mb-4">View Staff Accounts</h1>
+                <p class="text-lg text-secondary mb-4">View Staff Accounts By Constituency</p>
+            </div>
+            <v-btn color="primary" variant="outlined" prepend-icon="mdi-refresh" size="small" class="rounded-lg"
+                @click="getAllStaff" :loading="loading">Refresh</v-btn>
+        </div>
         <!-- Bookings Data Table -->
         <v-card class="rounded-lg" elevation="2">
             <v-card-title class="pa-6 bg-primary/5 border-b">
@@ -109,7 +186,8 @@ onMounted(() => {
                         </v-btn>
                     </v-col>
                     <v-col cols="12" md="3">
-                        <v-btn color="primary" variant="flat" prepend-icon="mdi-file-export" class="rounded-lg" size="small">
+                        <v-btn color="primary" variant="flat" prepend-icon="mdi-file-export" class="rounded-lg"
+                            size="small">
                             Export
                         </v-btn>
                     </v-col>
@@ -125,6 +203,10 @@ onMounted(() => {
 
             <v-data-table :headers="headers" :items="staffAccounts" item-value="id" class="staff-accounts-table"
                 :items-per-page="10" :mobile="$vuetify.display.mdAndDown" :mobile-breakpoint="960">
+                <!-- NationalIDColumn -->
+                <template v-slot:item.nationalIdNumber="{ item }">
+                    <p :class="{'line-through text-error' :item.isActive === 'Inactive'}">{{ item.nationalIdNumber  }}</p>
+                </template>
                 <!-- date of birth column -->
                 <template v-slot:item.dateOfBirth="{ item }">
                     <p class="text-sm text-secondary">{{ new Date(item.dateOfBirth).toLocaleDateString() }}</p>
@@ -138,28 +220,44 @@ onMounted(() => {
                 <!-- Actions -->
                 <template v-slot:item.actions="{ item }">
                     <div class="d-flex ga-2 justify-end">
-                        <v-btn color="primary" variant="text" size="small" class="rounded-lg" append-icon="mdi-pencil" @click="dialog = true">Edit</v-btn>
+                        <v-btn color="primary" variant="text" size="small" class="rounded-lg" append-icon="mdi-pencil"
+                            @click="editStaff(item)">Edit</v-btn>
                     </div>
                 </template>
             </v-data-table>
         </v-card>
     </div>
-    <v-dialog v-model="dialog" max-width="500">
-        <v-card class="pa-4">
-            <v-card-title>
-                <h2 class="text-xl font-semibold text-primary">Edit Staff Account</h2>
-            </v-card-title>
-            <v-card-text>
-                <!-- Deactivate Staff Account Form -->
-                <v-form>
-                    <v-switch label="Deactivate Staff Account"></v-switch>
-                </v-form>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="error" variant="flat" size="small" class="rounded-lg" @click="dialog = false">Cancel</v-btn>
-                <v-btn color="primary" variant="flat" size="small" class="rounded-lg">Confirm</v-btn>
-            </v-card-actions>
-        </v-card>
+    <v-dialog v-model="editDialog" max-width="500">
+        <v-confirm-edit ref="confirm" ok-text="Save" :model-value="selectedStaff" @save="handleSave"
+            @cancel="editDialog = false">
+            <template v-slot:default="{ model: proxyModel, actions }">
+                <v-card class="pa-4">
+                    <v-card-title>
+                        <h2 class="text-xl font-semibold text-primary">Edit Staff Account</h2>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-form ref="updateStaffForm" @submit.prevent="handleSave">
+                            <v-select label="Update Constituency" prepend-inner-icon="mdi-flag" variant="outlined"
+                                class="rounded-lg" color="primary" :items="constituencies" bg-color="white"
+                                v-model="proxyModel.value.constituency"></v-select>
+                            <v-divider class="my-4"></v-divider>
+                            <v-select label="Update Role" prepend-inner-icon="mdi-account-group" variant="outlined"
+                                class="rounded-lg" color="primary" :items="roles" bg-color="white"
+                                v-model="proxyModel.value.role"></v-select>
+                            <v-divider class="my-4"></v-divider>
+                            <v-radio-group v-model="proxyModel.value.isActive">
+                                <v-radio label="Activate Staff Account" value="Active" color="success"></v-radio>
+                                <v-radio label="Deactivate Staff Account" value="Inactive" color="error"></v-radio>
+                            </v-radio-group>
+                        </v-form>
+                    </v-card-text>
+                    <template v-slot:actions>
+                        <v-spacer></v-spacer>
+                        <component :is="actions" />
+                    </template>
+                </v-card>
+            </template>
+        </v-confirm-edit>
     </v-dialog>
 </template>
 
