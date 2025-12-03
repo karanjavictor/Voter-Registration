@@ -54,7 +54,7 @@ const getAnalytics = async () => {
             url += `?${params.toString()}`;
         }
         const response = await axiosInstance.get<AnalyticsResponse>(url);
-        console.log(response);
+        console.log(response.data.data);
         analytics.value = response.data.data;
     } catch (error) {
         console.error(error);
@@ -68,6 +68,7 @@ const clearAnalytics = () => {
         startDate: '',
         endDate: ''
     }
+    getAnalytics()
     filterDialog.value = false;
 }
 
@@ -125,7 +126,7 @@ onMounted(() => {
                         </v-avatar>
                         <div>
                             <p class="text-secondary">Total Number of Staff</p>
-                            <p class="text-2xl font-bold text-primary">{{ analytics.totalStaff }}</p>
+                            <p class="text-2xl font-bold text-primary">+ {{ analytics.totalStaff }}</p>
                         </div>
                     </div>
                 </v-card>
@@ -138,7 +139,7 @@ onMounted(() => {
                         </v-avatar>
                         <div>
                             <p class="text-secondary">Total Number of deceased voters</p>
-                            <p class="text-2xl font-bold text-primary">{{ analytics.totalDeceased }}</p>
+                            <p class="text-2xl font-bold text-primary">+ {{ analytics.totalDeceased }}</p>
                         </div>
                     </div>
                 </v-card>
@@ -150,8 +151,8 @@ onMounted(() => {
                             <v-icon icon="mdi-account-group" color="white" size="24"></v-icon>
                         </v-avatar>
                         <div>
-                            <p class="text-secondary">Total Number of New Voters</p>
-                            <p class="text-2xl font-bold text-primary">{{ analytics.totalVoters }}</p>
+                            <p class="text-secondary">Total Number of Voters</p>
+                            <p class="text-2xl font-bold text-primary">+ {{ analytics.totalVoters }}</p>
                         </div>
                     </div>
                 </v-card>
@@ -159,20 +160,17 @@ onMounted(() => {
         </v-row>
         <v-row>
             <!-- Voter Registration Analytics -->
-            <v-col cols="12">
-                <v-card class="rounded-lg " elevation="2">
-                    <v-card-title class="text-xl font-semibold text-primary mb-4">Total Voter
-                        Registration</v-card-title>
+            <v-col cols="12" v-if="analytics.constituencyAnalytics.length > 0">
+                <v-card class="rounded-lg" elevation="0">
                     <v-pie animation :legend="{ position: $vuetify.display.mdAndUp ? 'right' : 'bottom' }"
                         inner-cut="70" hide-slice size="300" hover-scale="0" rounded="2" gap="2"
                         :palette="analytics.constituencyAnalytics.map(constituency => constituency.color)" tooltip
                         reveal
                         :items="analytics.constituencyAnalytics.map(constituency => ({ title: constituency.name, value: constituency.value, color: constituency.color }))"
-                        class="flex justify-center items-center mx-auto">
+                        class="flex justify-center items-center mx-auto my-8">
                         <template v-slot:center>
                             <div class="text-center">
-                                <div class="text-2xl font-bold text-primary">{{ analytics.totalVoters }}</div>
-                                <div class="text-sm text-secondary">Total Voter Registrations</div>
+                                <div class="text-xl text-secondary">Voters By Constituency</div>
                             </div>
                         </template>
                         <template v-slot:legend>
@@ -186,7 +184,7 @@ onMounted(() => {
                                         <v-avatar :color="constituency.color" :size="16"></v-avatar>
                                     </template>
                                     <template v-slot:append>
-                                        <p class="text-secondary">{{ constituency.value }} Members</p>
+                                        <p class="text-secondary">{{ constituency.value }} Voters</p>
                                     </template>
                                 </v-list-item>
                             </v-list>
