@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axiosInstance from '@/config/axiosInstance';
 import { VForm } from 'vuetify/components';
+import { useAuthStore } from '@/stores/authStore';
+
+const auth = useAuthStore();
+const role = computed(() =>
+  auth.staff?.role?.toString().toLowerCase() ?? ''
+);
+
+const canToogleStaffState = computed(() =>
+  ['supervisor'].includes(role.value)
+);
 
 type StaffRole = 'Administrator' | 'Clerk' | 'Supervisor';
 type Gender = 'Male' | 'Female' | 'Rather not say';
@@ -243,9 +253,9 @@ const handleSave = async (updatedValue: any) => {
                             <v-divider class="my-4"></v-divider>
                             <v-select label="Update Role" prepend-inner-icon="mdi-account-group" variant="outlined"
                                 class="rounded-lg" color="primary" :items="roles" bg-color="white"
-                                v-model="proxyModel.value.role"></v-select>
+                                v-model="proxyModel.value.role" v-if="canToogleStaffState"></v-select>
                             <v-divider class="my-4"></v-divider>
-                            <v-radio-group v-model="proxyModel.value.isActive">
+                            <v-radio-group v-model="proxyModel.value.isActive" v-if="canToogleStaffState">
                                 <v-radio label="Activate Staff Account" value="Active" color="success"></v-radio>
                                 <v-radio label="Deactivate Staff Account" value="Inactive" color="error"></v-radio>
                             </v-radio-group>

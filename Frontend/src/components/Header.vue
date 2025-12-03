@@ -1,4 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/authStore';
+import { computed, ref } from 'vue';
+
+const auth = useAuthStore();
+const isAuthenticated = auth.isAuthenticated
+</script>
 
 <template>
     <v-app-bar elevation="1" class="pa-2">
@@ -13,7 +19,7 @@
 
         <div class="gap-x-4 flex items-center">
             <v-btn color="primary" variant="text" to="/">Home</v-btn>
-            <v-btn color="primary" variant="text" to="/staff-login">Login</v-btn>
+            <v-btn color="primary" variant="text" to="/staff-login" v-if="!isAuthenticated">Login</v-btn>
         </div>
     </v-app-bar>
 </template>

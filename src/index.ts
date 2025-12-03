@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import cookieParser from "cookie-parser";
 import staffRouter from './routes/staffRoutes';
 import voterRouter from './routes/voterRoutes';
 import analyticsRouter from './routes/analyticsRoutes';
@@ -8,9 +9,30 @@ import analyticsRouter from './routes/analyticsRoutes';
 dotenv.config();
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+// CORS Middleware
+const allowedOrigins = [
+  process.env['PRODUCTION_CLIENT_URL'],
+  process.env['DEVELOPMENT_CLIENT_URL'],
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true, // Allow cookies and credentials
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Set-Cookie']
+  })
+);
 
 const PORT = process.env['PORT'] || 3030;
 const NODE_ENV = process.env['NODE_ENV'] || "development";

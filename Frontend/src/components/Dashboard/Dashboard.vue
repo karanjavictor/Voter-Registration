@@ -1,6 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-const navLinks = ref([
+import router from '@/router';
+import { useAuthStore } from '@/stores/authStore';
+import { computed, ref } from 'vue';
+
+const auth = useAuthStore();
+const staffId = auth.staff?.staffId
+const role = computed(() =>
+    auth.staff?.role?.toString().toLowerCase() ?? ''
+);
+
+const canManageStaff = computed(() =>
+    ['administrator', 'supervisor'].includes(role.value)
+);
+
+const allNavLinks = ref([
     {
         title: 'Dashboard Overview',
         subtitle: 'View your dashboard',
@@ -12,12 +25,14 @@ const navLinks = ref([
         subtitle: 'Create a new staff member',
         icon: 'mdi-account-plus',
         to: '/dashboard/create-staff',
+        requiresManageStaff: true,
     },
     {
         title: 'View Staff',
         subtitle: 'View staff members',
         icon: 'mdi-account-group',
         to: '/dashboard/view-staff',
+        requiresManageStaff: true,
     },
     {
         title: 'View Voters',
@@ -30,14 +45,24 @@ const navLinks = ref([
         subtitle: 'View logs',
         icon: 'mdi-file-chart',
         to: '/dashboard/view-logs',
+        requiresManageStaff: true,
     },
     {
         title: 'View Analytics',
         subtitle: 'View analytics',
         icon: 'mdi-chart-bar',
         to: '/dashboard/view-analytics',
+        requiresManageStaff: true,
     },
 ]);
+
+const navLinks = computed(() =>
+    allNavLinks.value.filter(link => !link.requiresManageStaff || canManageStaff.value)
+);
+const logoutStaff = () => {
+    auth.logout();
+    router.push('/staff-login?redirect=/logout');
+}
 </script>
 
 <template>
@@ -58,7 +83,8 @@ const navLinks = ref([
         <!-- Dashboard Navigation Links -->
         <div class="drawer-nav-links">
             <v-list>
-                <v-list-item v-for="item in navLinks" :to="item.to" class="ma-2 rounded-lg min-h-auto" lines="two">
+                <v-list-item v-for="item in navLinks" :key="item.to" :to="item.to" class="ma-2 rounded-lg min-h-auto"
+                    lines="two">
                     <template v-slot:prepend>
                         <v-avatar size="40" class="bg-primary/10 mr-4">
                             <v-icon :icon="item.icon" color="primary" size="20"></v-icon>
@@ -80,8 +106,16 @@ const navLinks = ref([
             </v-list>
         </div>
         <template v-slot:append>
-            <div class="pa-2">
-                <v-btn block color="primary" variant="flat" class="rounded-lg" append-icon="mdi-logout">
+            <div class="pa-2 mt-2">
+                <div class="d-flex align-center justify-center mb-3" v-if="staffId">
+                    <v-avatar size="40" class="bg-primary mr-2">
+                        <v-icon icon="mdi-account" size="20"></v-icon>
+                    </v-avatar>
+                    <p class="text-sm font-medium text-secondary">{{ staffId }}</p>
+                </div>
+
+                <v-btn block color="primary" variant="flat" class="rounded-lg" append-icon="mdi-logout"
+                    @click="logoutStaff">
                     Logout
                 </v-btn>
             </div>

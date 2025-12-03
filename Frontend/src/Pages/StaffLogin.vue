@@ -36,7 +36,7 @@ const login = async () => {
     successAlertMessage.value = message;
 
     // Redirect to dashboard if needed
-    router.push("/dashboard");
+    router.push("/dashboard/dashboard-overview");
   } catch (error: any) {
     showErrorAlert.value = true;
     errorAlertMessage.value = error;

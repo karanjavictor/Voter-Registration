@@ -187,7 +187,7 @@ export const updateStaff = async (req: Request, res: Response) => {
       res.cookie("staff_token", token, {
         httpOnly: true,
         secure: NODE_ENV === "production", // only HTTPS in production
-        sameSite: "none",
+        sameSite: "strict",
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       });
   
@@ -204,6 +204,76 @@ export const updateStaff = async (req: Request, res: Response) => {
       console.error(error);
       return res.status(400).json({
         error: error instanceof Error ? error.message : "Login attempt failed",
+      });
+    }
+  };
+  export const checkAuth = async (req: Request, res: Response) => {
+    try {
+      const token = req.cookies['staff_token'];
+  
+      if (!token) {
+        return res.status(401).json({ authenticated: false });
+      }
+      if (!SECRET) {
+        throw new Error("JWT secret is not configured.");
+      }
+  
+      // Verify JWT
+      let payload: any;
+      try {
+        payload = jwt.verify(token, SECRET);
+      } catch (err) {
+        return res.status(401).json({ authenticated: false });
+      }
+  
+      // payload contains staffId
+      const staffId = payload.staffId;
+  
+      // Check if account still exists
+      const [rows]: any = await pool.query(
+        "SELECT staff_id, isActive, role FROM staff WHERE staff_id = ?",
+        [staffId]
+      );
+  
+      if (rows.length === 0) {
+        return res.status(401).json({ authenticated: false });
+      }
+  
+      const staff = rows[0];
+  
+      return res.status(200).json({
+        authenticated: true,
+        staff: {
+          role: staff.role,
+          staffId: staff.staff_id,
+        }
+      });
+  
+    } catch (error: any) {
+      console.error("Check-auth error:", error);
+      return res.status(500).json({
+        error: "Internal server error",
+      });
+    }
+  };
+
+  export const logoutStaff = async (_req: Request, res: Response) => {
+    try {
+      // Clear the staff_token cookie
+      res.clearCookie("staff_token", {
+        httpOnly: true,
+        secure: NODE_ENV === "production",
+        sameSite: "strict",
+      });
+  
+      return res.status(200).json({
+        message: "Logged out successfully",
+      });
+  
+    } catch (error) {
+      console.error("Logout error:", error);
+      return res.status(500).json({
+        error: error instanceof Error ? error.message : "Logout failed",
       });
     }
   };
